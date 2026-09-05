@@ -12,7 +12,7 @@
     "test": "vitest run --exclude server/studyforge.features.test.ts --exclude server/turso.env.test.ts",
     "test:integration": "vitest run server/studyforge.features.test.ts server/turso.env.test.ts",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "seed:waec": "node seed-waec-question-bank.mjs"
+    "seed:waec": "node seed-waec-subjects.mjs && node seed-waec-question-bank.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
