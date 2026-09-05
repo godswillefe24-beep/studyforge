@@ -113,31 +113,24 @@ export const appRouter = router({
     }),
   }),
   billing: router({
-    mode: publicProcedure.query(() => ({ configured: Boolean(ENV.paystackSecretKey), environment: ENV.paystackSecretKey?.startsWith("sk_test_") ? "test" as const : ENV.paystackSecretKey?.startsWith("sk_live_") ? "live" as const : "unknown" as const })),
+    mode: publicProcedure.query(() => ({ provider: "palmpay" as const, manual: true })),
     plans: publicProcedure.query(() => plans),
     subscription: protectedProcedure.query(async ({ ctx }) => (await db.getSubscription(ctx.user.id)) ?? { status: "free" as const, planCode: null, currentPeriodEnd: null }),
-    initializeCheckout: protectedProcedure.input(z.object({ planCode: z.enum(["studyforge_plus_monthly", "studyforge_plus_term"]) })).mutation(async ({ ctx, input }) => {
-      if (!ENV.paystackSecretKey) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Paystack is not configured yet." });
+    submitManualPayment: protectedProcedure.input(z.object({ planCode: z.enum(["studyforge_plus_monthly", "studyforge_plus_term"]), reference: z.string().trim().min(4).max(120) })).mutation(async ({ ctx, input }) => {
       const plan = plans.find((item) => item.code === input.planCode)!;
-      if (!ctx.user.email) throw new TRPCError({ code: "BAD_REQUEST", message: "Add an email to your profile before starting checkout." });
-      const response = await fetch("https://api.paystack.co/transaction/initialize", { method: "POST", headers: { Authorization: `Bearer ${ENV.paystackSecretKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ email: ctx.user.email, amount: plan.amountKobo, reference: `sf_${ctx.user.id}_${Date.now()}`, metadata: { userId: ctx.user.id, planCode: plan.code } }) });
-      const payload = await response.json() as { status?: boolean; message?: string; data?: { authorization_url: string; access_code: string; reference: string } };
-      if (!response.ok || !payload.status || !payload.data) throw new TRPCError({ code: "BAD_GATEWAY", message: payload.message || "Paystack could not initialize checkout." });
-      return payload.data;
-    }),
-    verifyCheckout: protectedProcedure.input(z.object({ reference: z.string().min(4), planCode: z.enum(["studyforge_plus_monthly", "studyforge_plus_term"]) })).mutation(async ({ ctx, input }) => {
-      if (!ENV.paystackSecretKey) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Paystack is not configured yet." });
-      const response = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(input.reference)}`, { headers: { Authorization: `Bearer ${ENV.paystackSecretKey}` } });
-      const payload = await response.json() as { status?: boolean; message?: string; data?: { status: string; amount: number; reference: string } };
-      if (!response.ok || !payload.status || payload.data?.status !== "success") throw new TRPCError({ code: "BAD_REQUEST", message: payload.message || "Payment has not been verified." });
-      const plan = plans.find((item) => item.code === input.planCode)!;
-      const periodMonths = input.planCode.endsWith("term") ? 3 : 1;
-      const currentPeriodEnd = new Date(); currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + periodMonths);
-      await db.upsertSubscription({ userId: ctx.user.id, reference: payload.data.reference, status: "active", planCode: plan.code, amountKobo: payload.data.amount, currentPeriodEnd });
-      return { status: "active" as const, currentPeriodEnd };
+      await db.upsertSubscription({ userId: ctx.user.id, reference: input.reference, status: "pending", planCode: plan.code, amountKobo: plan.amountKobo, currentPeriodEnd: null, provider: "palmpay" });
+      return { status: "pending" as const };
     }),
   }),
   admin: router({
+    pendingSubscriptions: adminProcedure.query(() => db.listPendingSubscriptions()),
+    approveSubscription: adminProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(async ({ input }) => {
+      const subscription = await db.getSubscription(input.userId);
+      if (!subscription || subscription.status !== "pending") throw new TRPCError({ code: "NOT_FOUND", message: "Pending subscription not found." });
+      const currentPeriodEnd = new Date(); currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + (subscription.planCode.endsWith("term") ? 3 : 1));
+      await db.upsertSubscription({ userId: input.userId, reference: subscription.reference ?? `palmpay_${input.userId}_${Date.now()}`, status: "active", planCode: subscription.planCode, amountKobo: subscription.amountKobo, currentPeriodEnd, provider: "palmpay" });
+      return { status: "active" as const, currentPeriodEnd };
+    }),
     catalog: adminProcedure.query(() => db.listContent()),
     updateQuestion: adminProcedure.input(z.object({ id: z.number().int().positive(), prompt: z.string().min(10).max(2000).optional(), explanation: z.string().max(1200).optional(), answerIndex: z.number().int().min(0).max(5).optional(), difficulty: z.string().max(30).optional(), options: z.array(z.string().min(1).max(500)).min(2).max(6).optional() })).mutation(({ input }) => db.updateQuestion(input.id, input)),
     deleteQuestion: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => db.deleteQuestion(input.id)),

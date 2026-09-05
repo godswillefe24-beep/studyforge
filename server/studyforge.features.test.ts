@@ -43,14 +43,6 @@ describe("StudyForge feature contracts", () => {
 });
 
 
-it("authenticates the configured Paystack secret against a read-only endpoint", async () => {
-  const secret = process.env.PAYSTACK_SECRET_KEY;
-  expect(secret, "PAYSTACK_SECRET_KEY must be configured").toBeTruthy();
-  const response = await fetch("https://api.paystack.co/bank?country=nigeria&perPage=1", { headers: { Authorization: `Bearer ${secret}` } });
-  expect(response.status).toBe(200);
-});
-
-
 it("hashes and verifies preview account passwords without storing plaintext", async () => {
   const { hashPassword, verifyPassword } = await import("./db");
   const hash = hashPassword("studyforge-test-password");

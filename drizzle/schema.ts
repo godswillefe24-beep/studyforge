@@ -71,9 +71,9 @@ export const attempts = sqliteTable("attempts", {
 export const subscriptions = sqliteTable("subscriptions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("userId").notNull().references(() => users.id),
-  provider: text("provider").notNull().default("paystack"),
+  provider: text("provider").notNull().default("palmpay"),
   reference: text("reference"),
-  status: text("status", { enum: ["free", "active", "past_due", "cancelled"] }).notNull().default("free"),
+  status: text("status", { enum: ["free", "pending", "active", "past_due", "cancelled"] }).notNull().default("free"),
   planCode: text("planCode").notNull().default("studyforge_plus_monthly"),
   amountKobo: integer("amountKobo").notNull().default(0),
   currentPeriodEnd: integer("currentPeriodEnd", { mode: "timestamp_ms" }),

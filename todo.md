@@ -15,7 +15,7 @@
 - [x] Save a final checkpoint and deliver the upgraded project version.
 
 - [x] Configure the supplied Turso/libSQL URL and token as server-only environment variables.
-- [x] Configure Paystack server credentials and webhook verification secret after the provider choice.
+- [x] Configure manual PalmPay account details and admin approval workflow after the provider choice.
 - [x] Replace the mock auth persistence path with the real protected auth/session flow while retaining the demo login fallback for preview.
 
 - [x] Add normalized question options storage or document and enforce the serialized option model consistently.
@@ -47,15 +47,15 @@
 - [x] Make the startup route always render the sign-in page for unauthenticated visitors and remove any hardcoded default learner name.
 - [x] Add persistent in-app streak notifications triggered by study activity and a notification history surface.
 - [x] Add granular learner analytics for accuracy, time, completion, subject breakdown, and recent trends.
-- [x] Add a Paystack test-mode checkout verification flow with safe status handling and a test-mode indicator.
+- [x] Add manual PalmPay payment submission with pending status and admin approval.
 - [x] Add an admin bulk-edit workflow for selecting and updating multiple WAEC content rows.
 - [x] Seed all requested WAEC subjects idempotently without fabricating user reviews or testimonials.
-- [x] Add tests for startup auth gating, streak notifications, analytics aggregation, Paystack test-mode handling, bulk edits, and subject seeding.
+- [x] Add tests for startup auth gating, streak notifications, analytics aggregation, manual billing, bulk edits, and subject seeding.
 - [x] Validate the updated desktop/mobile experience and save a final checkpoint.
 
 - [x] Replace the remaining hardcoded dashboard greeting name with the authenticated user's name and a neutral fallback.
 - [x] Bind progress subject breakdown, completion/time metrics, and recent trends to live analytics data.
-- [x] Add focused assertions for startup auth, streak creation, analytics aggregation, Paystack mode, bulk edits, and exact 36-subject seeding; document transient Turso timeout risk.
+- [x] Add focused assertions for startup auth, streak creation, analytics aggregation, manual billing, bulk edits, and exact 36-subject seeding; document transient Turso timeout risk.
 - [x] Capture final desktop and mobile screenshots after the gap fixes and save a new checkpoint.
 
 - [x] Surface live completed-session and average-time metrics directly in ProgressView.

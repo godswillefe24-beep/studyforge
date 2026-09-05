@@ -4,7 +4,6 @@ export const ENV = {
   databaseUrl: process.env.DATABASE_URL ?? "",
   tursoDatabaseUrl: process.env.TURSO_DATABASE_URL ?? "",
   tursoAuthToken: process.env.TURSO_AUTH_TOKEN ?? "",
-  paystackSecretKey: process.env.PAYSTACK_SECRET_KEY ?? "",
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",

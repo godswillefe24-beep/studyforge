@@ -15,7 +15,7 @@ pnpm dev
 
 The production build is `pnpm build` and runs with `pnpm start`. The server uses the `PORT` supplied by the hosting platform. Set the OAuth provider callback URL to `/api/oauth/callback` on the deployed app, and configure the same public app URL in the provider.
 
-`pnpm test` runs deterministic local tests. `pnpm test:integration` runs the Turso and Paystack checks and requires those credentials in `.env`.
+`pnpm test` runs deterministic local tests. `pnpm test:integration` runs the Turso-backed checks and requires database credentials in `.env`.
 
 ## Render
 
@@ -23,7 +23,7 @@ The repository includes `render.yaml`. In Render, create a Blueprint from the re
 
 ## Validation note
 
-The integration suite exercises the live Turso/libSQL database and Paystack read-only verification. A temporary Turso `ConnectTimeoutError` can cause network-backed tests to fail or exceed their individual timeout even when the application code is unchanged. Re-running the suite after connectivity recovers is the correct validation path; destructive seed data is never inserted by the tests.
+The integration suite exercises the live Turso/libSQL database. A temporary Turso `ConnectTimeoutError` can cause network-backed tests to fail or exceed their individual timeout even when the application code is unchanged. Re-running the suite after connectivity recovers is the correct validation path; destructive seed data is never inserted by the tests.
 
 ## Learner content and zero-state behavior
 

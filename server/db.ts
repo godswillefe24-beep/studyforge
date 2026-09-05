@@ -174,12 +174,29 @@ export async function get30DayHistory(userId: number) {
 export async function getSubscription(userId: number): Promise<Subscription | undefined> {
   const result = await execute({ sql: "SELECT * FROM subscriptions WHERE userId = ? LIMIT 1", args: [userId] });
   const row = result.rows[0] as Record<string, unknown> | undefined;
-  return row ? { id: numberFrom(row.id), userId: numberFrom(row.userId), provider: String(row.provider), reference: row.reference == null ? null : String(row.reference), status: ["active", "past_due", "cancelled"].includes(String(row.status)) ? String(row.status) as Subscription["status"] : "free", planCode: String(row.planCode), amountKobo: numberFrom(row.amountKobo), currentPeriodEnd: row.currentPeriodEnd == null ? null : dateFrom(row.currentPeriodEnd), createdAt: dateFrom(row.createdAt), updatedAt: dateFrom(row.updatedAt) } : undefined;
+  return row ? { id: numberFrom(row.id), userId: numberFrom(row.userId), provider: String(row.provider), reference: row.reference == null ? null : String(row.reference), status: ["pending", "active", "past_due", "cancelled"].includes(String(row.status)) ? String(row.status) as Subscription["status"] : "free", planCode: String(row.planCode), amountKobo: numberFrom(row.amountKobo), currentPeriodEnd: row.currentPeriodEnd == null ? null : dateFrom(row.currentPeriodEnd), createdAt: dateFrom(row.createdAt), updatedAt: dateFrom(row.updatedAt) } : undefined;
 }
 
-export async function upsertSubscription(input: { userId: number; reference: string; status: Subscription["status"]; planCode: string; amountKobo: number; currentPeriodEnd: Date | null }) {
+export async function upsertSubscription(input: { userId: number; reference: string; status: Subscription["status"]; planCode: string; amountKobo: number; currentPeriodEnd: Date | null; provider?: string }) {
   const now = Date.now();
-  await execute({ sql: `INSERT INTO subscriptions (userId, provider, reference, status, planCode, amountKobo, currentPeriodEnd, createdAt, updatedAt) VALUES (?, 'paystack', ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(userId) DO UPDATE SET reference = excluded.reference, status = excluded.status, planCode = excluded.planCode, amountKobo = excluded.amountKobo, currentPeriodEnd = excluded.currentPeriodEnd, updatedAt = excluded.updatedAt`, args: [input.userId, input.reference, input.status, input.planCode, input.amountKobo, input.currentPeriodEnd?.getTime() ?? null, now, now] });
+  await execute({ sql: `INSERT INTO subscriptions (userId, provider, reference, status, planCode, amountKobo, currentPeriodEnd, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(userId) DO UPDATE SET provider = excluded.provider, reference = excluded.reference, status = excluded.status, planCode = excluded.planCode, amountKobo = excluded.amountKobo, currentPeriodEnd = excluded.currentPeriodEnd, updatedAt = excluded.updatedAt`, args: [input.userId, input.provider ?? "palmpay", input.reference, input.status, input.planCode, input.amountKobo, input.currentPeriodEnd?.getTime() ?? null, now, now] });
+}
+
+export async function listPendingSubscriptions() {
+  const result = await execute({ sql: `SELECT subscriptions.*, users.name AS userName, users.email AS userEmail FROM subscriptions JOIN users ON users.id = subscriptions.userId WHERE subscriptions.status = 'pending' ORDER BY subscriptions.createdAt ASC`, args: [] });
+  return result.rows.map(row => ({
+    id: numberFrom(row.id),
+    userId: numberFrom(row.userId),
+    provider: String(row.provider),
+    reference: row.reference == null ? null : String(row.reference),
+    status: "pending" as const,
+    planCode: String(row.planCode),
+    amountKobo: numberFrom(row.amountKobo),
+    currentPeriodEnd: row.currentPeriodEnd == null ? null : dateFrom(row.currentPeriodEnd),
+    userName: row.userName == null ? null : String(row.userName),
+    userEmail: row.userEmail == null ? null : String(row.userEmail),
+    createdAt: dateFrom(row.createdAt),
+  }));
 }
 
 export async function insertContent(input: { exam: { code: string; name: string; description?: string; tier?: "free" | "premium" }; subject: { name: string; slug: string }; topic: { name: string; slug: string }; question: { prompt: string; options: string[]; answerIndex: number; explanation?: string; difficulty?: string } }) {
