@@ -37,6 +37,14 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    register: publicProcedure.input(z.object({ name: z.string().trim().min(2).max(120), email: z.string().email(), password: z.string().min(6).max(200) })).mutation(async ({ ctx, input }) => {
+      const email = input.email.trim().toLowerCase();
+      if (await db.getUserByEmail(email)) throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists. Sign in instead." });
+      const user = await db.getOrCreateDemoUser(email, input.name.trim(), input.password);
+      const token = await sdk.signSession({ openId: user.openId, appId: ENV.appId || "studyforge", name: user.name || input.name.trim() });
+      sessionCookie(ctx, token);
+      return { user };
+    }),
     demoLogin: publicProcedure.input(z.object({ email: z.string().email(), password: z.string().min(6) })).mutation(async ({ ctx, input }) => {
       let user;
       try {
