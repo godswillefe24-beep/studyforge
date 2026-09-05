@@ -1,0 +1,1 @@
+ALTER TABLE `practiceSessions` ADD `examId` integer REFERENCES exams(id);
