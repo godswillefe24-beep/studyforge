@@ -200,9 +200,9 @@ kbd { padding: 3px 5px; color: #a5aaa7; border: 1px solid var(--paper-line); bor
 .insight-banner { display: flex; align-items: center; gap: 16px; padding: 19px 21px; color: var(--white); background: var(--ink); border-left: 5px solid var(--coral); border-radius: 7px; box-shadow: var(--shadow-soft); }
 .insight-icon { display: grid; place-items: center; flex: none; width: 41px; height: 41px; color: var(--ink); background: var(--coral); border-radius: 50%; }
 .insight-copy { flex: 1; min-width: 0; }
-.insight-copy .mini-label { color: rgba(255,255,255,0.68); }
+.insight-copy .mini-label { color: rgba(255,255,255,0.9); }
 .insight-copy h3 { margin: 4px 0 3px; font-size: 14px; letter-spacing: -0.02em; }
-.insight-copy p { max-width: 680px; margin: 0; color: rgba(255,255,255,0.77); font-size: 10px; line-height: 1.5; }
+.insight-copy p { max-width: 680px; margin: 0; color: rgba(255,255,255,0.92); font-size: 10px; line-height: 1.5; }
 
 .recommendation-card { display: grid; grid-template-columns: 0.82fr 1fr; gap: 18px; align-items: stretch; min-height: 184px; overflow: hidden; background: var(--paper); border-radius: 6px; }
 .recommendation-art { position: relative; overflow: hidden; background: #d6e2d9; }
@@ -223,7 +223,7 @@ kbd { padding: 3px 5px; color: #a5aaa7; border: 1px solid var(--paper-line); bor
 .recommendation-card:hover .progress-card-front { transform: rotate(-5deg) translate(2px, -2px); }
 .recommendation-copy { padding: 19px 18px 17px 0; }
 .tag { display: inline-flex; align-items: center; min-height: 20px; padding: 0 7px; border-radius: 3px; font-size: 8px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
-.tag-coral { color: var(--coral-dark); background: #f7d4cc; }
+.tag-coral { color: #7a2118; background: #f7d4cc; }
 .tag-sand { color: #8c6a38; background: var(--gold-soft); }
 .recommendation-copy h3 { margin-top: 10px; font-family: "DM Serif Display", serif; font-size: 24px; font-weight: 400; }
 .recommendation-copy p { margin: 0 0 13px; color: var(--ink-muted); font-size: 10px; line-height: 1.55; }

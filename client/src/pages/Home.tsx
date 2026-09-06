@@ -733,7 +733,12 @@ export default function Home() {
             <button
               className="topbar-avatar"
               onClick={() => navigate("profile")}
-              aria-label="Open profile"
+              aria-label={`Profile, ${(user.name || user.email || "SF")
+                .split(/\s+/)
+                .map((part: string) => part[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}`}
             >
               {(user.name || user.email || "SF")
                 .split(/\s+/)
@@ -1215,6 +1220,7 @@ function DashboardView({
           <div className="recommendation-card">
             <div
               className="recommendation-art"
+              role="img"
               aria-label="Layered study cards representing progress"
             >
               <div className="progress-illustration">
